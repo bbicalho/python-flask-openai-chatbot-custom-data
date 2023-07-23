@@ -120,7 +120,8 @@ def train_chatbot():
             return jsonify({'error': 'No files available to train'})
         
         start_chatbot_training()
-        return redirect(url_for('train_chatbot'))  # Redirect back to the same page after POST
+        # return redirect(url_for('train_chatbot'))  # Redirect back to the same page after POST
+        return jsonify({'success': 'files available were training'})
     
     recent_files_info = get_received_files_info()
 
