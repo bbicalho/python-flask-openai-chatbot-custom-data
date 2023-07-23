@@ -37,6 +37,10 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  * 10 # Set maximum file siz
 
 # Helper function to read received files information
 def get_received_files_info():
+
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
+
     files_info = []
     for filename in os.listdir(app.config['UPLOAD_FOLDER']):
         if filename.lower().endswith('.pdf') or filename.lower().endswith('.txt'):
@@ -138,6 +142,10 @@ def train_chatbot():
     return response
 
 def start_chatbot_training():
+    
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
+
     received_files_path = app.config['UPLOAD_FOLDER']
     received_files = [f for f in os.listdir(received_files_path) if f.lower().endswith(('.pdf', '.txt'))]
 
