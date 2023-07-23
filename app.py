@@ -121,10 +121,13 @@ def train_chatbot():
         
         start_chatbot_training()
         return redirect(url_for('train_chatbot'))  # Redirect back to the same page after POST
+    
+    recent_files_info = get_received_files_info()
+
     with open(EXECUTIONS_DATA_FILE, 'r') as file:
         training_data = json.load(file)
 
-    response = make_response(render_template('train_chatbot.html', training_data=training_data))
+    response = make_response(render_template('train_chatbot.html', training_data=training_data, files_info=recent_files_info))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     

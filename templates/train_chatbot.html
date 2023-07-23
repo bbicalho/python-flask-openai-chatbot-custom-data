@@ -11,12 +11,12 @@
     <table>
         <tr>
             <th>Filename</th>
-            <th>Size (bytes)</th>
+            <th>Size (Megabytes)</th>
             <th>File Datetime</th>
         </tr>
         {% for file_info in files_info %}
         <tr>
-            <td>{{ file_info.name }}</td>
+            <td>{{ file_info.filename }}</td>
             <td>{{ file_info.size }}</td>
             <td>{{ file_info.datetime }}</td>
         </tr>
