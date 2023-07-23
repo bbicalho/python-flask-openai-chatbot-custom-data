@@ -176,12 +176,30 @@ def start_chatbot_training():
 
 
 def pdf_to_txt(input_folder, output_folder):
+
+
+    folder_path = output_folder
+
+    # Get a list of all files in the folder
+    file_list = os.listdir(folder_path)
+
+    # Loop through each file and check if it's a txt file
+    for filename in file_list:
+        if filename.lower().endswith('.txt'):
+            # Construct the full file path
+            file_path = os.path.join(folder_path, filename)
+            
+            # Delete the txt file
+            os.remove(file_path)
+            
     # Create the output folder if it doesn't exist
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
     # Get a list of all PDF files in the input folder
     pdf_files = [file for file in os.listdir(input_folder) if file.lower().endswith('.pdf')]
+
+
 
     for pdf_file in pdf_files:
         pdf_path = os.path.join(input_folder, pdf_file)
