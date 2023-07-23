@@ -70,7 +70,7 @@ def process_answer():
     return jsonify({'answer': bot_answer})
 
 
-@app.route('/receivedfiles')
+@app.route('/receivedfiles', methods=['POST'])
 def received_files():
     files_info = get_received_files_info()
     return render_template('received_files.html', files_info=files_info)
