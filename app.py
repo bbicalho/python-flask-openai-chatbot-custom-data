@@ -72,6 +72,25 @@ def process_answer():
 
 @app.route('/receivedfiles', methods=['GET', 'POST'])
 def received_files():
+    if request.method == 'POST':
+        # Check if the post request has file parts
+        if 'file' not in request.files:
+            return 'No file part in the request', 400
+
+        files = request.files.getlist('file')
+
+        # If the user does not select any files, return an error
+        if not files:
+            return 'No selected files', 400
+
+        # Save the files to the receivedfiles folder
+        for file in files:
+            if file.filename == '':
+                return 'No selected file', 400
+            file.save(os.path.join('receivedfiles', file.filename))
+
+        return redirect(url_for('received_files'))
+
     files_info = get_received_files_info()
     return render_template('received_files.html', files_info=files_info)
 

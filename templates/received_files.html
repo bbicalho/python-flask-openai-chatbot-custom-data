@@ -5,12 +5,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Files Already Loaded</h1>
     <form method="POST" enctype="multipart/form-data" action="{{ url_for('received_files') }}">
         <input type="file" name="file" accept=".pdf,.txt" multiple>
         <input type="submit" value="Upload Files">
     </form>
 
+    <h1>Files Already Loaded</h1>
     <table>
         <thead>
             <tr>
