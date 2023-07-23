@@ -1,0 +1,41 @@
+.menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.menu a {
+  font-size: 24px;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 10px;
+  margin: 5px;
+  border: 2px solid black;
+  border-radius: 10px;
+}
+
+/* Style for all tables */
+table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  table, th, td {
+    border: 1px solid black;
+  }
+  
+  th, td {
+    padding: 8px;
+    text-align: left;
+  }
+  
+  /* Excel-like table styles */
+  th {
+    background-color: #F2F2F2;
+    font-weight: bold;
+  }
+  
+  /* Alternating row colors */
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }

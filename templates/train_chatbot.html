@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Train Chatbot on Files</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Train Chatbot on Files</h1>
+    <!-- Table to display files in "receivedfiles" folder -->
+    <h2>Files in "receivedfiles" folder:</h2>
+    <table>
+        <tr>
+            <th>Filename</th>
+            <th>Size (bytes)</th>
+            <th>File Datetime</th>
+        </tr>
+        {% for file_info in files_info %}
+        <tr>
+            <td>{{ file_info.name }}</td>
+            <td>{{ file_info.size }}</td>
+            <td>{{ file_info.datetime }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Training Execution Datetime</th>
+                <th>Files Used in Training</th>
+                <th>Elapsed Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for execution in training_data %}
+            <tr>
+                <td>{{ execution['datetime'] }}</td>
+                <td>
+                    {% for file in execution['files'] %}
+                    {{ file }}<br>
+                    {% endfor %}
+                </td>
+                <td>{{ execution['elapsed_time'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('home') }}">Back to Homepage</a>
+    <div id="loadingGif" style="display: none;">
+        <img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading...">
+    </div>
+    <button id="submitBtn" onclick="startTraining()">Submit to Train with These Files</button>
+    
+    <div id="errorMessage" style="color: red; font-weight: bold;"></div>
+
+    <script>
+        function startTraining() {
+            const submitBtn = document.getElementById("submitBtn");
+            const loadingGif = document.getElementById("loadingGif");
+
+            // Disable the button and show the loading gif
+            submitBtn.disabled = true;
+            loadingGif.style.display = "block";
+
+            // fetch("/trainchatbot", { method: "POST" }).then(() => {
+            fetch("/trainchatbot", { method: "POST" })
+            .then(response => response.json())
+            .then(data => {
+                if ('error' in data) {
+                    document.getElementById('errorMessage').textContent = data.error;
+                } 
+                else 
+                {
+                    // Reload the page to display the updated training data
+                    window.location.reload();
+                }
+
+                // Hide the loading gif and enable the button after the POST request is processed
+                loadingGif.style.display = "none";
+                submitBtn.disabled = false;
+
+            }).catch(error => {
+                console.error('Error:', error);
+                document.getElementById('errorMessage').textContent = 'An error occurred. Please try again later.';
+            });
+        }
+    </script>
+</body>
+</html>

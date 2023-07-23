@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .chat-container {
+            width: 400px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow-y: scroll;
+            max-height: 500px;
+            padding: 10px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .user {
+            background-color: #cce5ff;
+            text-align: left;
+        }
+
+        .answer-machine {
+            background-color: #e5ffcc;
+            text-align: right;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('home') }}">Back to Homepage</a>
+    <div class="chat-container" id="chatContainer"></div>
+
+    <div class="input-container">
+        <textarea type="text" id="userInput" cols="50" rows="5" placeholder="Type your question..." onkeypress="handleKeyPress(event)"></textarea>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        let answerCount = 0;
+
+        function addMessage(message, type) {
+            const chatContainer = document.getElementById("chatContainer");
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", type);
+
+            const timestamp = document.createElement("div");
+            timestamp.classList.add("timestamp");
+            timestamp.textContent = new Date().toLocaleString();
+
+            const content = document.createElement("div");
+            content.textContent = message;
+
+            messageDiv.appendChild(timestamp);
+            messageDiv.appendChild(content);
+            chatContainer.appendChild(messageDiv);
+
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Auto scroll down to follow the chat
+        }
+
+        function sendMessage() {
+            const userInput = document.getElementById("userInput").value;
+            document.getElementById("userInput").value = "";
+
+            if (userInput.trim() !== "") {
+                addMessage(userInput, "user");
+                sendAnswer(userInput);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.keyCode === 13) {
+                sendMessage();
+            }
+        }
+
+        async function sendAnswer(userInput) {
+            // answerCount++;
+            // const answer = "This is answer number " + answerCount;
+            // setTimeout(() => {
+            //     addMessage(answer, "answer-machine");
+            // }, 500); // Simulate a slight delay for the answer
+            const response = await fetch('/process_answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ question: userInput })
+            });
+
+            const data = await response.json();
+            // displayResponse(data.answer);
+            addMessage(data.answer, "answer-machine");
+
+        }
+    </script>
+</body>
+</html>

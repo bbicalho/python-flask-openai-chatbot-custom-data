@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot</title>
+</head>
+<body>
+    <h1>Chatbot</h1>
+    <form method="POST" onsubmit="return askQuestion()">
+        <textarea id="userInput" rows="5" cols="50"></textarea><br>
+        <input type="submit" value="Ask">
+    </form>
+
+    <div id="chatContainer"></div>
+
+    <script>
+        async function askQuestion() {
+            event.preventDefault();
+            const userInput = document.getElementById("userInput").value;
+            document.getElementById("userInput").value = "";
+
+            const response = await fetch('/process_answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ question: userInput })
+            });
+
+            const data = await response.json();
+            displayResponse(data.answer);
+
+            return false;
+        }
+
+        function displayResponse(answer) {
+            const chatContainer = document.getElementById("chatContainer");
+            const userQuestion = document.createElement("textarea");
+            userQuestion.setAttribute("readonly", "true");
+            userQuestion.value = "User: " + document.getElementById("userInput").value;
+            chatContainer.appendChild(userQuestion);
+
+            const botResponse = document.createElement("textarea");
+            botResponse.setAttribute("readonly", "true");
+            botResponse.value = "Bot: " + answer;
+            chatContainer.appendChild(botResponse);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Files Already Loaded</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Files Already Loaded</h1>
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('received_files') }}">
+        <input type="file" name="file" accept=".pdf,.txt" multiple>
+        <input type="submit" value="Upload Files">
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Filename</th>
+                <th>File Size (MB)</th>
+                <th>File Datetime</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for file_info in files_info %}
+            <tr>
+                <td>{{ file_info.filename }}</td>
+                <td>{{ file_info.size }}</td>
+                <td>{{ file_info.datetime }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('home') }}">Back to Homepage</a>
+</body>
+</html>
