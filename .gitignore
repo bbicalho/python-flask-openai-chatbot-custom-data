@@ -5,3 +5,7 @@ share/
 etc/
 bicas_vscode_key
 bicas_vscode_key.pub
+text/
+pdf-folder/
+processed/
+prompts-values.json

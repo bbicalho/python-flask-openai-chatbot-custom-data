@@ -419,12 +419,13 @@ def create_context(
 
 def answer_question(
     df,
-    model="text-davinci-003",
+    # model="text-davinci-003",
+    model="gpt-3.5-turbo-16k",
     question="Am I allowed to publish model outputs to Twitter, without a human review?",
-    max_len=1800,
+    max_len=5800,
     size="ada",
     debug=False,
-    max_tokens=1500,
+    max_tokens=15000,
     stop_sequence=None
 ):
     """
@@ -454,18 +455,35 @@ def answer_question(
         print(prompt_dont_know_text)
         print(prompt_role_purpose)
 
-        # Create a completions using the questin and context
-        response = openai.Completion.create(
-            prompt=f"{prompt_role_purpose} \"{prompt_dont_know_text}\"\n\nContext: {context}\n\n---\n\nQuestion: {question}\nAnswer:",
-            temperature=0,
-            max_tokens=max_tokens,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-            stop=stop_sequence,
-            model=model,
+        
+        # prompt=f"{prompt_role_purpose} \"{prompt_dont_know_text}\"\n\nContexto: {context}\n\n---\n\nPergunta: {question}\nResposta:",
+        prompt=f"{prompt_role_purpose} \"{prompt_dont_know_text}\"\n\nContexto: {context}\n\n---\n\n"
+        question = f"Pergunta: {question}\n"
+
+        response = openai.ChatCompletion.create(
+            # model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-16k",
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": question}
+            ]
         )
-        return response["choices"][0]["text"].strip()
+        print(response['choices'][0]['message']['content'])
+        print(type(response['choices'][0]['message']['content']))
+        return response['choices'][0]['message']['content']
+    
+        # # Create a completions using the questin and context
+        # response = openai.Completion.create(
+        #     prompt=f"{prompt_role_purpose} \"{prompt_dont_know_text}\"\n\nContext: {context}\n\n---\n\nQuestion: {question}\nAnswer:",
+        #     temperature=0,
+        #     max_tokens=max_tokens,
+        #     top_p=1,
+        #     frequency_penalty=0,
+        #     presence_penalty=0,
+        #     stop=stop_sequence,
+        #     model=model,
+        # )
+        # return response["choices"][0]["text"].strip()
     except Exception as e:
         print(e)
         return ""
