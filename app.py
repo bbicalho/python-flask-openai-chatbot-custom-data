@@ -195,8 +195,10 @@ def pdf_to_txt(input_folder, output_folder):
     # Loop through each file and check if it's a txt file
     for filename in file_list:
         if filename.lower().endswith('.txt'):
+            
             # Construct the full file path
             file_path = os.path.join(folder_path, filename)
+            print(file_path)
             
             # Delete the txt file
             os.remove(file_path)
@@ -239,6 +241,18 @@ def move_files_to_pdf_folder():
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder)
 
+    # remove destination files before getting the new uploaded ones
+    file_list = [file for file in os.listdir(destination_folder) if file.lower().endswith(('.pdf', '.txt'))]
+    for filename in file_list:
+        if filename.lower().endswith('.pdf'):
+            
+            # Construct the full file path
+            file_path = os.path.join(destination_folder, filename)
+            print(file_path)
+            
+            # Delete the txt file
+            os.remove(file_path)
+    
     # Get a list of all PDF and TXT files in the source folder
     file_list = [file for file in os.listdir(source_folder) if file.lower().endswith(('.pdf', '.txt'))]
 
@@ -468,8 +482,8 @@ def answer_question(
                 {"role": "user", "content": question}
             ]
         )
-        print(response['choices'][0]['message']['content'])
-        print(type(response['choices'][0]['message']['content']))
+        # print(response['choices'][0]['message']['content'])
+        # print(type(response['choices'][0]['message']['content']))
         return response['choices'][0]['message']['content']
     
         # # Create a completions using the questin and context
