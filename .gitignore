@@ -9,3 +9,5 @@ text/
 pdf-folder/
 processed/
 prompts-values.json
+training-executions-data.json
+nohup.out
