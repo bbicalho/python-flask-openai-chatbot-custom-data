@@ -484,6 +484,7 @@ def answer_question(
         )
         # print(response['choices'][0]['message']['content'])
         # print(type(response['choices'][0]['message']['content']))
+        print(response['choices'])
         return response['choices'][0]['message']['content']
     
         # # Create a completions using the questin and context
