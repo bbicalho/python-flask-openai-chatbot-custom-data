@@ -26,12 +26,12 @@
 
         .user {
             background-color: #cce5ff;
-            text-align: left;
+            /* text-align: left; */
         }
 
         .answer-machine {
             background-color: #e5ffcc;
-            text-align: right;
+            /* text-align: right; */
         }
 
         .timestamp {
@@ -104,7 +104,9 @@
 
             const data = await response.json();
             // displayResponse(data.answer);
+            data.answer = data.answer.replace("\n", "<br>");
             addMessage(data.answer, "answer-machine");
+            
 
         }
     </script>
