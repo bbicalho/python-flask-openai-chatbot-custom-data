@@ -172,9 +172,17 @@ def start_chatbot_training():
     end_time = datetime.now()
     elapsed_time = (end_time - start_time).seconds
 
+    saopaulo_tz = pytz.timezone('America/Sao_Paulo')
+
+    # Get the current datetime in the Sao Paulo timezone
+    current_datetime_saopaulo = datetime.now(saopaulo_tz)
+
+    # Format the datetime as a string
+    formatted_datetime = current_datetime_saopaulo.strftime("%Y-%m-%d %H:%M:%S")
+
     # Add a new row to training data
     new_execution = {
-        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "datetime": formatted_datetime,
         "files": received_files,
         "elapsed_time": elapsed_time
     }
