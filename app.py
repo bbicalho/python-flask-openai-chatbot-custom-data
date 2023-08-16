@@ -146,6 +146,31 @@ def train_chatbot():
 
     return response
 
+@app.route('/submit_rating', methods=['POST'])
+def submit_rating():
+    try:
+        data = request.get_json()
+        rating = int(data['rating'])
+        
+        # Load existing ratings or create an empty list
+        try:
+            with open('ratings.json', 'r') as file:
+                ratings = json.load(file)
+        except FileNotFoundError:
+            ratings = []
+
+        # Append the new rating to the ratings list
+        ratings.append(rating)
+
+        # Save the updated ratings list to the file
+        with open('ratings.json', 'w') as file:
+            json.dump(ratings, file)
+
+        return jsonify({'message': 'Rating submitted successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+
 def start_chatbot_training():
     
     if not os.path.exists(app.config['UPLOAD_FOLDER']):

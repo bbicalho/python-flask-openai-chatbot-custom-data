@@ -8,6 +8,13 @@
             font-family: Arial, sans-serif;
         }
 
+        .rating-form {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
         .chat-container {
             width: 400px;
             margin: 20px auto;
@@ -50,7 +57,56 @@
         <button onclick="sendMessage()">Send</button>
     </div>
 
+    <div class="rating-form">
+        <h2>Rate this item</h2>
+        <form id="ratingForm">
+            <label for="rating">Select Rating:</label>
+            <select id="rating" name="rating">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+            <button type="submit" id="submitButton">Submit Rating</button>
+        </form>
+    </div>
+
+
     <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const ratingForm = document.getElementById("ratingForm");
+            const ratingSelect = document.getElementById("rating");
+            const submitButton = document.getElementById("submitButton");
+
+        ratingForm.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                const selectedRating = ratingSelect.value;
+
+                // Disable the form and submit button
+                ratingSelect.disabled = true;
+                submitButton.disabled = true;
+
+                // Send the selected rating to the Flask route
+                fetch('/submit_rating', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ rating: selectedRating })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Rating submitted successfully:", data);
+                })
+                .catch(error => {
+                    console.error("Error submitting rating:", error);
+                });
+            });
+        });
+
         let answerCount = 0;
 
         function addMessage(message, type) {
