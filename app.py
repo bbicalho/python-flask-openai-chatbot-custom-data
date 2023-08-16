@@ -3,6 +3,7 @@ import os
 import json
 from datetime import datetime
 import shutil
+import pytz
 
 import requests
 import re
@@ -38,6 +39,9 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  * 10 # Set maximum file siz
 # Helper function to read received files information
 def get_received_files_info():
 
+    brasilia_tz = pytz.timezone('America/Sao_Paulo')
+
+
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
 
@@ -47,7 +51,8 @@ def get_received_files_info():
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file_size = os.path.getsize(file_path) / (1024 * 1024)  # Convert to MB
             file_date = datetime.fromtimestamp(os.path.getmtime(file_path))
-            files_info.append({'filename': filename, 'size': round(file_size, 2), 'datetime': file_date})
+            file_date_brasilia = file_date.replace(tzinfo=pytz.utc).astimezone(brasilia_tz)
+            files_info.append({'filename': filename, 'size': round(file_size, 2), 'datetime': file_date_brasilia})
     return files_info
 
 @app.route('/')
