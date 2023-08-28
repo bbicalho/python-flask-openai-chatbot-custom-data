@@ -5,12 +5,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Welcome to My Website!</h1>
+    <h1>Welcome {{user_id}} to My Website! </h1>
     <div class="menu">
-        <a href="{{ url_for('received_files') }}">Submit Files to Learn</a>
-        <a href="{{ url_for('train_chatbot') }}">Train the AI with Files</a>
-        <a href="{{ url_for('chatbot_prompts') }}">Edit chatbot Prompts</a>
-        <a href="{{ url_for('chatbot') }}">Go To ChatBot</a>
+       
+        <a href="{{ url_for('received_files', id=user_id) }}">Submit Files to Learn</a>
+        <a href="{{ url_for('train_chatbot', id=user_id) }}">Train the AI with Files</a>
+        <a href="{{ url_for('chatbot_prompts', id=user_id)}}">Edit chatbot Prompts</a>
+        <a href="{{ url_for('chatbot', id=user_id) }}">Go To ChatBot</a>
     </div>
 </body>
 </html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            margin: 0;
+            /* display: flex; */
+            justify-content: center;
+            align-items: center;
+            background-color: #f7f7f7;
+        }
+
+        .break {
+            flex-basis: 100%;
+            width: 0px;
+            height: 0px;
+        }
+
+        .container {
+            text-align: top;
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        Gerador de Links:
+    </div>
+    <div class="break"></div>
+    <div class="container">
+        <button onclick="createLink()">Create Link</button>
+        <div id="linkContainer"></div>
+    </div>
+    
+    <script>
+        function createLink() {
+            const randomString = Math.random().toString(36).substring(2, 8);
+            document.getElementById('linkContainer').innerHTML += randomString + '<br>';
+            fetch('/save_link', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ link: randomString })
+            });
+        }
+
+        // On page load, fetch already created links
+        window.onload = function() {
+            fetch('/get_links')
+            .then(response => response.json())
+            .then(data => {
+                let i = 0;
+                let contatenated = "";
+                while (i < data.length) {
+                    // console.log(data[i]);
+                    contatenated = contatenated + '<a href="menu/'+data[i]+'"> link chatbot: '+data[i]+'</a><br>';
+                    i++;
+                }
+                document.getElementById('linkContainer').innerHTML = contatenated;
+                // document.getElementById('linkContainer').innerHTML = data.join('<br>')+'<br>';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -49,7 +49,7 @@
     </style>
 </head>
 <body>
-    <a href="{{ url_for('home') }}">Back to Homepage</a>
+    <a href="{{ url_for('menu', id=user_id) }}">Back to Homepage</a>
     <div class="chat-container" id="chatContainer"></div>
 
     <div class="input-container">
@@ -150,7 +150,7 @@
             // setTimeout(() => {
             //     addMessage(answer, "answer-machine");
             // }, 500); // Simulate a slight delay for the answer
-            const response = await fetch('/process_answer', {
+            const response = await fetch('/process_answer/{{user_id}}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

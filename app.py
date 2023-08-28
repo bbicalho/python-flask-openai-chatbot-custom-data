@@ -29,58 +29,77 @@ load_dotenv()
 app = Flask(__name__)
 
 UPLOAD_FOLDER = os.path.join(app.root_path, 'receivedfiles')
-ALLOWED_EXTENSIONS = {'pdf', 'txt'}
-EXECUTIONS_DATA_FILE = os.path.join(app.root_path, 'training-executions-data.json')
-PROMPTS_VALUES_FILE = os.path.join(app.root_path, 'prompts-values.json')
+# ALLOWED_EXTENSIONS = {'pdf', 'txt'}
+# PROMPTS_VALUES_FILE = os.path.join(app.root_path, 'prompts-values.json')
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  * 10 # Set maximum file size to 160MB
 
-# Helper function to read received files information
-def get_received_files_info():
-
-    brasilia_tz = pytz.timezone('America/Sao_Paulo')
-
-
-    if not os.path.exists(app.config['UPLOAD_FOLDER']):
-        os.makedirs(app.config['UPLOAD_FOLDER'])
-
-    files_info = []
-    for filename in os.listdir(app.config['UPLOAD_FOLDER']):
-        if filename.lower().endswith('.pdf') or filename.lower().endswith('.txt'):
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file_size = os.path.getsize(file_path) / (1024 * 1024)  # Convert to MB
-            file_date = datetime.fromtimestamp(os.path.getmtime(file_path))
-            file_date_brasilia = file_date.replace(tzinfo=pytz.utc).astimezone(brasilia_tz)
-            files_info.append({'filename': filename, 'size': round(file_size, 2), 'datetime': file_date_brasilia})
-    return files_info
-
-@app.route('/')
+@app.route('/superadm')
 def home():
-    return render_template('index.html')
+    return render_template('admin.html')
 
 
-@app.route('/chatbot', methods=['GET'])
-def chatbot():
-    return render_template('chatbot2.html')
+@app.route('/menu/<id>', methods=['GET'])
+def menu(id):
+    print(id)
+    return render_template('index.html',user_id=id)
 
-@app.route('/process_answer', methods=['POST'])
-def process_answer():
+
+@app.route('/chatbot/<id>', methods=['GET'])
+def chatbot(id):
+    return render_template('chatbot2.html', user_id=id)
+
+
+
+@app.route('/get_links', methods=['GET'])
+def get_links():
+    if os.path.exists('links-created.json'):
+        with open('links-created.json', 'r') as file:
+            links = json.load(file)
+            return jsonify(links)
+    else:
+        return jsonify([])
+
+@app.route('/save_link', methods=['POST'])
+def save_link():
+    new_link = request.json.get('link')
+    
+    links = []
+    if os.path.exists('links-created.json'):
+        with open('links-created.json', 'r') as file:
+            links = json.load(file)
+    
+    links.append(new_link)
+    
+    with open('links-created.json', 'w') as file:
+        json.dump(links, file)
+    
+    return jsonify({"status": "success"})
+
+
+@app.route('/process_answer/<id>', methods=['POST'])
+def process_answer(id):
     user_question = request.json['question']
     # Call your process_answer function here and get the bot's answer
     # Replace the example response with the actual bot's answer
 
-    df=pd.read_csv('processed/embeddings.csv', index_col=0)
+    # df=pd.read_csv('processed/embeddings.csv', index_col=0)
+    processed_folder = 'processed/'+id
+    df=pd.read_csv(processed_folder+'/embeddings.csv', index_col=0)
     df['embeddings'] = df['embeddings'].apply(literal_eval).apply(np.array)
 
-    bot_answer = answer_question(df, question=user_question)
+    bot_answer = answer_question(df, question=user_question,id=id)
     # bot_answer = "This is an example response from the bot."
 
     return jsonify({'answer': bot_answer})
 
 
-@app.route('/receivedfiles', methods=['GET', 'POST'])
-def received_files():
+@app.route('/receivedfiles/<id>', methods=['GET', 'POST'])
+# @app.route('/receivedfiles', methods=['GET', 'POST'])
+# def received_files(id):
+def received_files(id):
+    print(id)
     if request.method == 'POST':
         # Check if the post request has file parts
         if 'file' not in request.files:
@@ -96,31 +115,50 @@ def received_files():
         for file in files:
             if file.filename == '':
                 return 'No selected file', 400
-            file.save(os.path.join('receivedfiles', file.filename))
+            
+            user_folder = 'receivedfiles/'+id
+            file.save(os.path.join(user_folder, file.filename))
 
-        return redirect(url_for('received_files'))
+        return redirect(url_for('received_files', id=id))
 
-    files_info = get_received_files_info()
-    return render_template('received_files.html', files_info=files_info)
+    files_info = get_received_files_info(id)
+    return render_template('received_files.html', files_info=files_info, user_id=id)
+    # return render_template('received_files.html', files_info=files_info)
 
-@app.route('/chatbotprompts', methods=['GET', 'POST'])
-def chatbot_prompts():
+@app.route('/chatbotprompts/<id>', methods=['GET', 'POST'])
+def chatbot_prompts(id):
+    print(id)
+    # prompt_file = PROMPTS_VALUES_FILE+'-'+id
+    prompt_file = os.path.join(app.root_path, 'prompts/'+id+'/prompts-values.json')
+
     if request.method == 'POST':
         data = {
             'prompt-role-purpose': request.form.get('prompt-role-purpose'),
             'prompt-dont-know-text': request.form.get('prompt-dont-know-text')
         }
-        with open(PROMPTS_VALUES_FILE, 'w') as file:
+        
+        if not os.path.exists(os.path.join(app.root_path , 'prompts')):
+            os.makedirs(os.path.join(app.root_path , 'prompts'))
+    
+        if not os.path.exists(os.path.join(app.root_path ,'prompts/'+id)):
+            os.makedirs(os.path.join(app.root_path ,'prompts/'+id))
+    
+        with open(prompt_file, 'w+') as file:
             json.dump(data, file)
-    with open(PROMPTS_VALUES_FILE, 'r', encoding="utf-8") as file:
-        prompts_values = json.load(file)
-    return render_template('chatbot_prompts.html', prompts_values=prompts_values)
+
+    if(os.path.exists(prompt_file)):
+        with open(prompt_file, 'r', encoding="utf-8") as file:
+            prompts_values = json.load(file)
+    else:
+        prompts_values = {"prompt-role-purpose": "Responda \u00e0 pergunta com base no contexto abaixo e, se a pergunta n\u00e3o puder ser respondida com base no contexto, responda ", "prompt-dont-know-text": "Nao tenho conhecimento sobre essa informacao"}
+        
+    return render_template('chatbot_prompts.html', prompts_values=prompts_values, user_id=id)
 
 
 
-@app.route('/trainchatbot', methods=['GET', 'POST'])
-def train_chatbot():
-
+@app.route('/trainchatbot/<id>', methods=['GET', 'POST'])
+def train_chatbot(id):
+    print(id)
     # Set Cache-Control and Pragma headers to prevent caching
 
     if request.method == 'POST':
@@ -128,16 +166,19 @@ def train_chatbot():
         if not received_files:
             return jsonify({'error': 'No files available to train'})
         
-        start_chatbot_training()
+        start_chatbot_training(id)
         # return redirect(url_for('train_chatbot'))  # Redirect back to the same page after POST
         return jsonify({'success': 'files available were training'})
     
-    recent_files_info = get_received_files_info()
+    recent_files_info = get_received_files_info(id)
 
-    with open(EXECUTIONS_DATA_FILE, 'r') as file:
-        training_data = json.load(file)
+    training_file = os.path.join(app.root_path, 'training/'+id+'/training-executions-data.json')
+    training_data = []
+    if os.path.exists(training_file):
+        with open(training_file, 'r') as file:
+            training_data = json.load(file)
 
-    response = make_response(render_template('train_chatbot.html', training_data=training_data, files_info=recent_files_info))
+    response = make_response(render_template('train_chatbot.html', training_data=training_data, files_info=recent_files_info, user_id=id))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     
@@ -171,12 +212,33 @@ def submit_rating():
         return jsonify({'error': str(e)})
 
 
-def start_chatbot_training():
-    
-    if not os.path.exists(app.config['UPLOAD_FOLDER']):
-        os.makedirs(app.config['UPLOAD_FOLDER'])
 
-    received_files_path = app.config['UPLOAD_FOLDER']
+# Helper function to read received files information
+def get_received_files_info(id):
+
+    brasilia_tz = pytz.timezone('America/Sao_Paulo')
+
+    user_folder = app.config['UPLOAD_FOLDER']+'/'+id
+    if not os.path.exists(user_folder):
+        os.makedirs(user_folder)
+
+    files_info = []
+    for filename in os.listdir(user_folder):
+        if filename.lower().endswith('.pdf') or filename.lower().endswith('.txt'):
+            file_path = os.path.join(user_folder, filename)
+            file_size = os.path.getsize(file_path) / (1024 * 1024)  # Convert to MB
+            file_date = datetime.fromtimestamp(os.path.getmtime(file_path))
+            file_date_brasilia = file_date.replace(tzinfo=pytz.utc).astimezone(brasilia_tz)
+            files_info.append({'filename': filename, 'size': round(file_size, 2), 'datetime': file_date_brasilia})
+    return files_info
+
+def start_chatbot_training(id):
+    
+    train_folder = app.config['UPLOAD_FOLDER'] + '/'+ id
+    if not os.path.exists(train_folder):
+        os.makedirs(train_folder)
+
+    received_files_path = train_folder
     received_files = [f for f in os.listdir(received_files_path) if f.lower().endswith(('.pdf', '.txt'))]
 
     # Calculate the elapsed time
@@ -187,12 +249,12 @@ def start_chatbot_training():
     import time
     # time.sleep(5)  # Simulate training time of 5 seconds
     
-    move_files_to_pdf_folder()
-    input_folder_path = 'pdf-folder'  # Replace with the path to the folder containing PDF files
-    output_folder_path = 'text/pdf'  # Replace with the path to the output folder
+    move_files_to_pdf_folder(id)
+    input_folder_path = 'pdf-folder/'+id  # Replace with the path to the folder containing PDF files
+    output_folder_path = 'text/pdf/'+id  # Replace with the path to the output folder
     pdf_to_txt(input_folder_path, output_folder_path)
-    process_pdf_txt()
-    do_embeddings()
+    process_pdf_txt(id)
+    do_embeddings(id)
         
     end_time = datetime.now()
     elapsed_time = (end_time - start_time).seconds
@@ -211,7 +273,20 @@ def start_chatbot_training():
         "files": received_files,
         "elapsed_time": elapsed_time
     }
-    with open(EXECUTIONS_DATA_FILE, 'r+') as file:
+
+    if not os.path.exists(os.path.join(app.root_path , 'training')):
+        os.makedirs(os.path.join(app.root_path , 'training'))
+    
+    if not os.path.exists(os.path.join(app.root_path ,'training/'+id)):
+        os.makedirs(os.path.join(app.root_path ,'training/'+id))
+    
+    training_file = os.path.join(app.root_path, 'training/'+id+'/training-executions-data.json')
+    if not os.path.exists(training_file):
+        with open(training_file, 'w+') as file:
+            json.dump([], file, indent=4)
+            file.truncate()
+
+    with open(training_file, 'r+') as file:
         data = json.load(file)
         data.append(new_execution)
         file.seek(0)
@@ -228,6 +303,9 @@ def pdf_to_txt(input_folder, output_folder):
     folder_path = output_folder
 
     # Get a list of all files in the folder
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
     file_list = os.listdir(folder_path)
 
     # Loop through each file and check if it's a txt file
@@ -270,10 +348,10 @@ def pdf_to_txt(input_folder, output_folder):
 # pdf_to_txt(input_folder_path, output_folder_path)
 
 
-def move_files_to_pdf_folder():
+def move_files_to_pdf_folder(id):
     
-    source_folder = "receivedfiles"
-    destination_folder = "pdf-folder"
+    source_folder = "receivedfiles/"+id
+    destination_folder = "pdf-folder/"+id
 
     # Check if the destination folder exists and create it if not
     if not os.path.exists(destination_folder):
@@ -354,12 +432,12 @@ def split_into_many(text, max_tokens = max_tokens):
 
     return chunks
     
-def process_pdf_txt():
+def process_pdf_txt(id):
 
     # Create a list to store the text files
     texts=[]
 
-    domain = 'pdf'
+    domain = 'pdf/'+id
 
     # Get all the text files in the text directory
     for file in os.listdir("text/" + domain + "/"):
@@ -375,22 +453,24 @@ def process_pdf_txt():
     df = pd.DataFrame(texts, columns = ['fname', 'text'])
 
     # Check if the destination folder exists and create it if not
-    if not os.path.exists('processed'):
-        os.makedirs('processed')
+    processed_folder = 'processed/'+id
+    if not os.path.exists(processed_folder):
+        os.makedirs(processed_folder)
 
     # Set the text column to be the raw text with the newlines removed
     df['text'] = df.fname + ". " + remove_newlines(df.text)
-    df.to_csv('processed/scraped.csv')
+    df.to_csv(processed_folder+'/scraped.csv')
     df.head()
 
-def do_embeddings():
+def do_embeddings(id):
 
     max_tokens = 1500
 
     # Load the cl100k_base tokenizer which is designed to work with the ada-002 model
     tokenizer = tiktoken.get_encoding("cl100k_base")
 
-    df = pd.read_csv('processed/scraped.csv', index_col=0)
+    processed_folder = 'processed/'+id
+    df = pd.read_csv(processed_folder+'/scraped.csv', index_col=0)
     df.columns = ['title', 'text']
 
     # Tokenize the text and save the number of tokens to a new column
@@ -431,7 +511,7 @@ def do_embeddings():
     # Please check out our rate limit guide to learn more on how to handle this: https://platform.openai.com/docs/guides/rate-limits
 
     df['embeddings'] = df.text.apply(lambda x: openai.Embedding.create(input=x, engine='text-embedding-ada-002')['data'][0]['embedding'])
-    df.to_csv('processed/embeddings.csv')
+    df.to_csv(processed_folder+ '/embeddings.csv')
 
     # df.head()
     
@@ -478,7 +558,8 @@ def answer_question(
     size="ada",
     debug=False,
     max_tokens=15000,
-    stop_sequence=None
+    stop_sequence=None,
+    id=id
 ):
     """
     Answer a question based on the most similar context from the dataframe texts
@@ -497,9 +578,9 @@ def answer_question(
     try:
         
         # {"prompt-role-purpose": "Responda à pergunta com base no contexto abaixo e, se a pergunta não puder ser respondida com base no contexto, responda ", "prompt-dont-know-text": "pô brother, aí tu me fudeu...."}
-        file_path = "prompts-values.json"
+        prompt_file = os.path.join(app.root_path, 'prompts/'+id+'/prompts-values.json')
 
-        with open(file_path, "r", encoding="utf-8") as file:
+        with open(prompt_file, "r", encoding="utf-8") as file:
             data = json.load(file)
 
         prompt_dont_know_text = data.get("prompt-dont-know-text", "")
@@ -543,5 +624,5 @@ def answer_question(
         return ""
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
 

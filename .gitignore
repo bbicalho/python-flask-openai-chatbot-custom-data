@@ -11,3 +11,5 @@ processed/
 prompts-values.json
 training-executions-data.json
 nohup.out
+ratings.json
+links-created.json

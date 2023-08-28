@@ -7,13 +7,13 @@
 </head>
 <body>
     <h1>Chatbot Prompts</h1>
-    <form method="POST" action="{{ url_for('chatbot_prompts') }}">
+    <form method="POST" action="{{ url_for('chatbot_prompts', id=user_id) }}">
         <label for="prompt-role-purpose">Prompt Role and Purpose</label><br>
         <textarea id="prompt-role-purpose" name="prompt-role-purpose" rows="10" cols="50">{{ prompts_values['prompt-role-purpose'] }}</textarea><br>
         <label for="prompt-dont-know-text">Don't Know Answer Text</label><br>
         <textarea id="prompt-dont-know-text" name="prompt-dont-know-text" rows="10" cols="50">{{ prompts_values['prompt-dont-know-text'] }}</textarea><br>
         <input type="submit" value="Save Prompts">
     </form>
-    <a href="{{ url_for('home') }}">Back to Homepage</a>
+    <a href="{{ url_for('menu', id=user_id) }}">Back to Homepage</a>
 </body>
 </html>

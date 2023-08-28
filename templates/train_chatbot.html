@@ -46,7 +46,7 @@
             {% endfor %}
         </tbody>
     </table>
-    <a href="{{ url_for('home') }}">Back to Homepage</a>
+    <a href="{{ url_for('menu', id=user_id) }}">Back to Homepage</a>
     <div id="loadingGif" style="display: none;">
         <img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading...">
     </div>
@@ -64,7 +64,7 @@
             loadingGif.style.display = "block";
 
             // fetch("/trainchatbot", { method: "POST" }).then(() => {
-            fetch("/trainchatbot", { method: "POST" })
+            fetch("/trainchatbot/{{user_id}}", { method: "POST" })
             .then(response => response.json())
             .then(data => {
                 if ('error' in data) {
