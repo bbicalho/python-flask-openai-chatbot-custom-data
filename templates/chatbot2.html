@@ -57,7 +57,7 @@
         <button onclick="sendMessage()">Send</button>
     </div>
 
-    <div class="rating-form">
+    <!-- <div class="rating-form">
         <h2>Rate this item</h2>
         <form id="ratingForm">
             <label for="rating">Select Rating:</label>
@@ -70,42 +70,42 @@
             </select>
             <button type="submit" id="submitButton">Submit Rating</button>
         </form>
-    </div>
+    </div> -->
 
 
     <script>
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const ratingForm = document.getElementById("ratingForm");
-            const ratingSelect = document.getElementById("rating");
-            const submitButton = document.getElementById("submitButton");
+        // document.addEventListener("DOMContentLoaded", function () {
+        //     const ratingForm = document.getElementById("ratingForm");
+        //     const ratingSelect = document.getElementById("rating");
+        //     const submitButton = document.getElementById("submitButton");
 
-        ratingForm.addEventListener("submit", function (event) {
-                event.preventDefault();
+        // ratingForm.addEventListener("submit", function (event) {
+        //         event.preventDefault();
 
-                const selectedRating = ratingSelect.value;
+        //         const selectedRating = ratingSelect.value;
 
-                // Disable the form and submit button
-                ratingSelect.disabled = true;
-                submitButton.disabled = true;
+        //         // Disable the form and submit button
+        //         ratingSelect.disabled = true;
+        //         submitButton.disabled = true;
 
-                // Send the selected rating to the Flask route
-                fetch('/submit_rating', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ rating: selectedRating })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Rating submitted successfully:", data);
-                })
-                .catch(error => {
-                    console.error("Error submitting rating:", error);
-                });
-            });
-        });
+        //         // Send the selected rating to the Flask route
+        //         fetch('/submit_rating', {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json'
+        //             },
+        //             body: JSON.stringify({ rating: selectedRating })
+        //         })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             console.log("Rating submitted successfully:", data);
+        //         })
+        //         .catch(error => {
+        //             console.error("Error submitting rating:", error);
+        //         });
+        //     });
+        // });
 
         let answerCount = 0;
 
