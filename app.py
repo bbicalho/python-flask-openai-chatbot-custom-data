@@ -211,6 +211,51 @@ def submit_rating():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+@app.route('/submit_delete', methods=['POST'])
+def submit_delete():
+    try:
+        data = request.get_json()
+        myid = data['myid']
+        
+        # delete files from received files
+        folder_path = "receivedfiles/"+myid
+    
+        file_list = os.listdir(folder_path)
+        for filename in file_list:
+            # Construct the full file path
+            file_path = os.path.join(folder_path, filename)
+            print(file_path)
+            
+            # Delete the txt file
+            os.remove(file_path)
+    
+        # delete files from pdf-folder
+        folder_path = "pdf-folder/"+myid
+        file_list = os.listdir(folder_path)
+        for filename in file_list:
+            # Construct the full file path
+            file_path = os.path.join(folder_path, filename)
+            print(file_path)
+            
+            # Delete the txt file
+            os.remove(file_path)
+    
+        # delete files from processed
+        folder_path = "processed/"+myid
+        file_list = os.listdir(folder_path)
+        for filename in file_list:
+            # Construct the full file path
+            file_path = os.path.join(folder_path, filename)
+            print(file_path)
+            
+            # Delete the txt file
+            os.remove(file_path)
+    
+        
+        return jsonify({'message': 'Chat deleted ok'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 
 
 # Helper function to read received files information

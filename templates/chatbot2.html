@@ -57,6 +57,14 @@
         <button onclick="sendMessage()">Send</button>
     </div>
 
+    <div class="rating-form">
+        <form id="deleteForm">
+            <label for="rating">Delete CHAT</label>
+            <button type="submit" id="submitDelete">Delete</button>
+        </form>
+        <div id="response"></div>
+    </div>
+
     <!-- <div class="rating-form">
         <h2>Rate this item</h2>
         <form id="ratingForm">
@@ -74,6 +82,36 @@
 
 
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ratingForm = document.getElementById("deleteForm");
+            // const ratingSelect = document.getElementById("rating");
+            const submitButton = document.getElementById("submitDelete");
+
+            ratingForm.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                // Disable the form and submit button
+                submitButton.disabled = true;
+                let myidval = "{{user_id}}";
+
+                // Send the selected rating to the Flask route
+                fetch('/submit_delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ myid: myidval })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Chat removido:", data);
+                    response.innerHTML = data.message;
+                })
+                .catch(error => {
+                    console.error("Error submitting delete:", error);
+                });
+            });
+        });
 
         // document.addEventListener("DOMContentLoaded", function () {
         //     const ratingForm = document.getElementById("ratingForm");
