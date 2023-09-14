@@ -55,6 +55,7 @@ def menu(id):
 
 @app.route('/chatbot/<id>', methods=['GET'])
 def chatbot(id):
+    questions_array.clear()
     return render_template('chatbot2.html', user_id=id)
 
 
