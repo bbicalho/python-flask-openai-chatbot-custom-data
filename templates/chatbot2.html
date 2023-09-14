@@ -23,6 +23,7 @@
             overflow-y: scroll;
             max-height: 500px;
             padding: 10px;
+            resize: both;
         }
 
         .message {
@@ -50,7 +51,7 @@
 </head>
 <body>
     <a href="{{ url_for('menu', id=user_id) }}">Back to Homepage</a>
-    <div class="chat-container" id="chatContainer"></div>
+    <div class="chat-container" id="chatContainer"><div class="resize-handle"></div></div>
 
     <div class="input-container">
         <textarea type="text" id="userInput" cols="50" rows="5" placeholder="Type your question..." onkeypress="handleKeyPress(event)"></textarea>
@@ -59,7 +60,7 @@
 
     <div class="rating-form">
         <form id="deleteForm">
-            <label for="rating">Delete CHAT</label>
+            <label for="submitDelete">Delete CHAT</label>
             <button type="submit" id="submitDelete">Delete</button>
         </form>
         <div id="response"></div>
@@ -82,6 +83,17 @@
 
 
     <script>
+        // const chatContainer = document.getElementById('chatContainer');
+
+        // chatContainer.addEventListener('mousedown', startResize); 
+
+        // function startResize(e) {
+        // // Check if clicked on resize handle
+        //     if(e.target.classList.contains('resize-handle')) {
+        //         // Start resize logic
+        //     }
+        // }
+
         document.addEventListener("DOMContentLoaded", function () {
             const ratingForm = document.getElementById("deleteForm");
             // const ratingSelect = document.getElementById("rating");

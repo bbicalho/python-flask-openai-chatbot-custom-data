@@ -13,3 +13,4 @@ training-executions-data.json
 nohup.out
 ratings.json
 links-created.json
+log_file-*

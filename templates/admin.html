@@ -45,7 +45,8 @@
     <script>
         function createLink() {
             const randomString = Math.random().toString(36).substring(2, 8);
-            document.getElementById('linkContainer').innerHTML += randomString + '<br>';
+            contatenated = '<a href="menu/'+randomString+'"> link chatbot: '+randomString+'</a>';
+            document.getElementById('linkContainer').innerHTML += contatenated + '<br>';
             fetch('/save_link', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

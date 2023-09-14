@@ -35,6 +35,13 @@ UPLOAD_FOLDER = os.path.join(app.root_path, 'receivedfiles')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  * 10 # Set maximum file size to 160MB
 
+
+brasilia_tz = pytz.timezone('America/Sao_Paulo')
+current_datetime = datetime.now(brasilia_tz)
+file_path = 'log_file-'+current_datetime.strftime('%Y-%m-%d-%H-%M-%S%Z')+'.txt'
+
+questions_array = []
+
 @app.route('/superadm')
 def home():
     return render_template('admin.html')
@@ -99,7 +106,7 @@ def process_answer(id):
 # @app.route('/receivedfiles', methods=['GET', 'POST'])
 # def received_files(id):
 def received_files(id):
-    print(id)
+    # print(id)
     if request.method == 'POST':
         # Check if the post request has file parts
         if 'file' not in request.files:
@@ -127,7 +134,7 @@ def received_files(id):
 
 @app.route('/chatbotprompts/<id>', methods=['GET', 'POST'])
 def chatbot_prompts(id):
-    print(id)
+    # print(id)
     # prompt_file = PROMPTS_VALUES_FILE+'-'+id
     prompt_file = os.path.join(app.root_path, 'prompts/'+id+'/prompts-values.json')
 
@@ -150,15 +157,26 @@ def chatbot_prompts(id):
         with open(prompt_file, 'r', encoding="utf-8") as file:
             prompts_values = json.load(file)
     else:
-        prompts_values = {"prompt-role-purpose": "Responda \u00e0 pergunta com base no contexto abaixo e, se a pergunta n\u00e3o puder ser respondida com base no contexto, responda ", "prompt-dont-know-text": "Nao tenho conhecimento sobre essa informacao"}
-        
+        prompts_values = write_prompt_default(id)
+
     return render_template('chatbot_prompts.html', prompts_values=prompts_values, user_id=id)
 
+def write_prompt_default(id):
+    prompt_file = os.path.join(app.root_path, 'prompts/'+id+'/prompts-values.json')
+    prompts_values = {"prompt-role-purpose": "Responda \u00e0 pergunta com base no contexto abaixo e, se a pergunta n\u00e3o puder ser respondida com base no contexto, responda ", "prompt-dont-know-text": "Nao tenho conhecimento sobre essa informacao"}
+    if not os.path.exists(os.path.join(app.root_path , 'prompts')):
+        os.makedirs(os.path.join(app.root_path , 'prompts'))
 
+    if not os.path.exists(os.path.join(app.root_path ,'prompts/'+id)):
+        os.makedirs(os.path.join(app.root_path ,'prompts/'+id))
+
+    with open(prompt_file, 'w+') as file:
+        json.dump(prompts_values, file)
+    return prompts_values
 
 @app.route('/trainchatbot/<id>', methods=['GET', 'POST'])
 def train_chatbot(id):
-    print(id)
+    # print(id)
     # Set Cache-Control and Pragma headers to prevent caching
 
     if request.method == 'POST':
@@ -224,7 +242,7 @@ def submit_delete():
         for filename in file_list:
             # Construct the full file path
             file_path = os.path.join(folder_path, filename)
-            print(file_path)
+            # print(file_path)
             
             # Delete the txt file
             os.remove(file_path)
@@ -235,7 +253,7 @@ def submit_delete():
         for filename in file_list:
             # Construct the full file path
             file_path = os.path.join(folder_path, filename)
-            print(file_path)
+            # print(file_path)
             
             # Delete the txt file
             os.remove(file_path)
@@ -246,7 +264,7 @@ def submit_delete():
         for filename in file_list:
             # Construct the full file path
             file_path = os.path.join(folder_path, filename)
-            print(file_path)
+            # print(file_path)
             
             # Delete the txt file
             os.remove(file_path)
@@ -359,7 +377,7 @@ def pdf_to_txt(input_folder, output_folder):
             
             # Construct the full file path
             file_path = os.path.join(folder_path, filename)
-            print(file_path)
+            # print(file_path)
             
             # Delete the txt file
             os.remove(file_path)
@@ -409,7 +427,7 @@ def move_files_to_pdf_folder(id):
             
             # Construct the full file path
             file_path = os.path.join(destination_folder, filename)
-            print(file_path)
+            # print(file_path)
             
             # Delete the txt file
             os.remove(file_path)
@@ -555,7 +573,29 @@ def do_embeddings(id):
     # Note that you may run into rate limit issues depending on how many files you try to embed
     # Please check out our rate limit guide to learn more on how to handle this: https://platform.openai.com/docs/guides/rate-limits
 
-    df['embeddings'] = df.text.apply(lambda x: openai.Embedding.create(input=x, engine='text-embedding-ada-002')['data'][0]['embedding'])
+    # df['embeddings'] = df.text.apply(lambda x: openai.Embedding.create(input=x, engine='text-embedding-ada-002')['data'][0]['embedding'])
+    # Create empty list to store embeddings
+    embeddings = []
+
+    # Iterate through each text value in the dataframe  
+    for text in df.text:
+        # Call OpenAI Embedding API
+        response = openai.Embedding.create(
+            input=text, 
+            engine='text-embedding-ada-002'
+        )
+
+        log_to_file('training: ' + str(response['usage']))
+
+        # Extract embedding vector from response
+        embedding = response['data'][0]['embedding'] 
+
+        # Append embedding to list
+        embeddings.append(embedding)
+
+    # Add embeddings list as new column in dataframe
+    df['embeddings'] = embeddings
+
     df.to_csv(processed_folder+ '/embeddings.csv')
 
     # df.head()
@@ -569,7 +609,17 @@ def create_context(
     """
 
     # Get the embeddings for the question
-    q_embeddings = openai.Embedding.create(input=question, engine='text-embedding-ada-002')['data'][0]['embedding']
+    response = openai.Embedding.create(input=question, engine='text-embedding-ada-002')
+    
+    # log_to_file('training: ' + str(response['usage']))
+
+        # Extract embedding vector from response
+    q_embeddings = response['data'][0]['embedding'] 
+    
+
+    log_to_file('create_context: ' + str(response['usage']))
+    # print(q_embeddings)
+
 
     # Get the distances from the embeddings
     df['distances'] = distances_from_embeddings(q_embeddings, df['embeddings'].values, distance_metric='cosine')
@@ -624,32 +674,50 @@ def answer_question(
         
         # {"prompt-role-purpose": "Responda à pergunta com base no contexto abaixo e, se a pergunta não puder ser respondida com base no contexto, responda ", "prompt-dont-know-text": "pô brother, aí tu me fudeu...."}
         prompt_file = os.path.join(app.root_path, 'prompts/'+id+'/prompts-values.json')
+        if not os.path.exists(prompt_file):
+            write_prompt_default(id)
 
         with open(prompt_file, "r", encoding="utf-8") as file:
             data = json.load(file)
 
         prompt_dont_know_text = data.get("prompt-dont-know-text", "")
         prompt_role_purpose = data.get("prompt-role-purpose", "")
-        print(prompt_dont_know_text)
-        print(prompt_role_purpose)
+        # print(prompt_dont_know_text)
+        # print(prompt_role_purpose)
 
-        
+        questions_array.append(question)
+
         # prompt=f"{prompt_role_purpose} \"{prompt_dont_know_text}\"\n\nContexto: {context}\n\n---\n\nPergunta: {question}\nResposta:",
         prompt=f"{prompt_role_purpose} \"{prompt_dont_know_text}\"\n\nContexto: {context}\n\n---\n\n"
-        question = f"Pergunta: {question}\n"
+        # question = f"Pergunta: {question}\n"
 
+        messages_parameter = [{"role": "system", "content": prompt}]
+        # Loop through each question in the questions array and add it to the messages list
+        i = 3
+        for question in questions_array:
+            if i % 2 == 1:
+                messages_parameter.append({"role": "user", "content": question})
+            else:
+                messages_parameter.append({"role": "assistant", "content": question})
+            i = i+1
+        
         response = openai.ChatCompletion.create(
             # model="gpt-3.5-turbo",
             model="gpt-3.5-turbo-16k",
             temperature=0.0,
-            messages=[
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": question}
-            ]
+            messages=messages_parameter
         )
+
+        # print(messages_parameter)
+
         # print(response['choices'][0]['message']['content'])
         # print(type(response['choices'][0]['message']['content']))
-        print(response['choices'])
+        log_to_file('completion: '+str(response['usage']))
+        # print(response['usage'])
+        # print(response['choices'])
+        
+        questions_array.append(response['choices'][0]['message']['content'])
+
         return response['choices'][0]['message']['content']
     
         # # Create a completions using the questin and context
@@ -667,6 +735,17 @@ def answer_question(
     except Exception as e:
         print(e)
         return ""
+
+def log_to_file(message):
+    
+    message = message.replace("\r\n", "")
+    brasilia_tz = pytz.timezone('America/Sao_Paulo')
+    current_datetime = datetime.now(brasilia_tz)
+    
+    with open(file_path, 'a') as file:
+        formatted_datetime = current_datetime.strftime('%Y-%m-%d %H:%M:%S %Z')
+        log_entry = f'{formatted_datetime};{message}\n'
+        file.write(log_entry)
 
 if __name__ == '__main__':
     app.run(debug=True)
