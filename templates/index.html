@@ -7,10 +7,15 @@
 <body>
     <h1>Welcome {{user_id}} to My Website! </h1>
     <div class="menu">
-       
+        {% if can_upload %}
         <a href="{{ url_for('received_files', id=user_id) }}">Submit Files to Learn</a>
+        {% endif %}
+        {% if can_train %}
         <a href="{{ url_for('train_chatbot', id=user_id) }}">Train the AI with Files</a>
+        {% endif %}
+        {% if can_prompt %}
         <a href="{{ url_for('chatbot_prompts', id=user_id)}}">Edit chatbot Prompts</a>
+        {% endif %}
         <a href="{{ url_for('chatbot', id=user_id) }}">Go To ChatBot</a>
     </div>
 </body>

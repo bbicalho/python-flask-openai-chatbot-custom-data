@@ -37,8 +37,9 @@
         Gerador de Links:
     </div>
     <div class="break"></div>
+    <button onclick="createLink()">Create Link</button>
+    <br>
     <div class="container">
-        <button onclick="createLink()">Create Link</button>
         <div id="linkContainer"></div>
     </div>
     
@@ -54,21 +55,134 @@
             });
         }
 
+                    
+        function handleCheckboxChange(rowId) {
+            const row = document.getElementById(rowId);
+            // const checked = checkbox.checked;
+            // alert(rowId);
+            // alert(row);
+            if (row) {
+
+                var dataToSave = {}; // Object to store the data
+                var fullRow = {}; // Object to store the data
+
+                var rowID = 0;
+
+                // Iterate through all the cells in the row
+                for (var i = 0; i < row.cells.length; i++) {
+                    var cellType = row.cells[i].nodeName;
+                    // console.log('Cell ' + i + ' type: ' + cellType);
+                    var checkboxInput = row.cells[i].querySelector('input[type="checkbox"]');
+
+                    let checkboxischecked = false;
+                    let checkboxInputid = "";
+                    let checkboxInputName = "";
+                    if (checkboxInput) {
+                        // If a checkbox is found, get its value (checked or not checked)
+                        var isChecked = checkboxInput.checked;
+                        checkboxischecked = isChecked;
+                        checkboxInputid = checkboxInput.id;
+                        checkboxInputName = checkboxInput.name;
+                        // console.log('Cell ' + i + ' checkbox value: ' + isChecked);
+                    }
+
+                    var alink = row.cells[i].querySelector('a');
+                    if (alink) {
+                        // alert(alink.id);
+                        checkboxInputid = alink.id;
+                        checkboxInputName = alink.name;
+                    }
+
+                    // Access the cell's data value and do something with it
+                    var cellData = row.cells[i].textContent;
+                    var cellID = checkboxInputid;
+                    var cellvalue = row.cells[i].checked;
+                    console.log('Cell ' + i + ', id: '+ cellID +', checkboxvalue: '+ checkboxischecked+', data: ' + cellData);
+                    // dataToSave[cellID] = {checkboxInputName,cellvalue];
+                    
+                    if(i == 0)
+                        rowID = cellID;
+                    dataToSave[checkboxInputName] = checkboxischecked;
+                        
+                    
+                    // alert('Cell ' + i + + ', id: '+ cellID +', data: ' + cellData+ ', value: '+cellvalue);
+                }
+                
+                // dataToSave[cellID] = [checkboxischecked,checkboxInputName];
+                // console.log(dataToSave);
+                
+                var postarray = {};
+                postarray[rowID] = dataToSave;
+
+                console.log(postarray);
+                // return;
+                
+                // Convert the object to JSON
+                var jsonData = JSON.stringify(postarray);
+
+                // return;
+                // Make a POST request to your Flask route
+                fetch('/save_super_admin_settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: jsonData
+                })
+                .then(response => response.json())
+                // .then(data => {
+                //     console.log(data)
+                //     // Save the data to the JSON file
+                //     // saveDataToFile(data);
+                // }
+                ;
+            } else {
+                console.log('Row with ID ' + rowId + ' not found.');
+            }
+            
+
+        // Save state of checkbox in some data structure
+        
+        // Could fire ajax request to save state on server
+        }
+
         // On page load, fetch already created links
         window.onload = function() {
             fetch('/get_links')
             .then(response => response.json())
             .then(data => {
                 let i = 0;
-                let contatenated = "";
-                while (i < data.length) {
-                    // console.log(data[i]);
-                    contatenated = contatenated + '<a href="menu/'+data[i]+'"> link chatbot: '+data[i]+'</a><br>';
+                // let contatenated = "";
+                let table = '<table class="zebra" style="max-width:60%;">';
+                // console.log(data)
+                // while (i < data.length) {
+                for (var key in data) {
+                    // console.log(key);
+                    console.log(data[key]['ativaprompt'+key]);
+                    // console.log(data['ativaprompt'+key]);
+                    table += '<tr id="'+key+'">';
+                    table +=  '<td><a id="'+key+'" name="link'+key+'" href="menu/'+key+'"> link chatbot: '+key+'</a></td>';
+                    var ativaprompt = (data[key]['ativaprompt'+key]==true)?'checked':'';
+                    table +=  '<td><input type="checkbox" name="ativaprompt'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" '+ativaprompt+'> ativa prompt</input></td>';
+                    var ativaarquivo = (data[key]['ativaarquivo'+key]==true)?'checked':'';
+                    table +=  '<td><input type="checkbox" name="ativaarquivo'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" '+ativaarquivo+'> ativa arquivo</input></td>';
+                    var ativatreinar = (data[key]['ativatreinar'+key]==true)?'checked':'';
+                    table +=  '<td><input type="checkbox" name="ativatreinar'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" '+ativatreinar+'> ativa treinar</input></td>';
+                    var ativadelete = (data[key]['ativadelete'+key]==true)?'checked':'';
+                    table +=  '<td><input type="checkbox" name="ativadelete'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" '+ativadelete+'> ativa delete</input></td>';
+                    // contatenated += '<br>';
+                    table += '</tr>';
+            
                     i++;
                 }
-                document.getElementById('linkContainer').innerHTML = contatenated;
+                table += '</table>';
+                document.getElementById('linkContainer').innerHTML = table;
+
+
                 // document.getElementById('linkContainer').innerHTML = data.join('<br>')+'<br>';
             });
+
+
         }
     </script>
 </body>

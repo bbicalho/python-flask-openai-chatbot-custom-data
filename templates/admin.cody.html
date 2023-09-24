@@ -1,0 +1,26 @@
+```html
+<script>
+function handleCheckboxChange(rowId) {
+  const checkbox = document.getElementById(rowId);
+  const checked = checkbox.checked;
+  
+  // Save state of checkbox in some data structure
+  
+  // Could fire ajax request to save state on server
+}
+</script>
+
+<table>
+{% for i in range(data|length) %}
+
+  <tr id="row-{{i}}">
+    <td>
+      <input type="checkbox" id="checkbox-{{i}}" onchange="handleCheckboxChange('row-{{i}}')">
+    </td>
+    <td><a href="menu/{{data[i]}}">link chatbot: {{data[i]}}</a></td> 
+  </tr>
+
+{% endfor %}
+</table>
+```
+

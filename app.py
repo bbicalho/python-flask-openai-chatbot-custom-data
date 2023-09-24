@@ -50,7 +50,27 @@ def home():
 @app.route('/menu/<id>', methods=['GET'])
 def menu(id):
     print(id)
-    return render_template('index.html',user_id=id)
+
+    # get menu permissions and list only allowed menus
+    if os.path.exists('super-adm-linK-settings.json'):
+        with open('super-adm-linK-settings.json', 'r') as file:
+            links = json.load(file)
+            # return jsonify(links)
+    else:
+        links = jsonify([])
+
+    if id in links:
+        can_upload = links[id]['ativaarquivo'+id]
+        can_train = links[id]['ativatreinar'+id]
+        can_prompt = links[id]['ativaprompt'+id]
+        can_delete = links[id]['ativadelete'+id] 
+    else:
+        can_upload = True
+        can_train = True
+        can_prompt = True
+        can_delete = True
+
+    return render_template('index.html',user_id=id, can_upload=can_upload, can_train=can_train, can_prompt=can_prompt, can_delete=can_delete)
 
 
 @app.route('/chatbot/<id>', methods=['GET'])
@@ -62,8 +82,14 @@ def chatbot(id):
 
 @app.route('/get_links', methods=['GET'])
 def get_links():
-    if os.path.exists('links-created.json'):
-        with open('links-created.json', 'r') as file:
+    # if os.path.exists('links-created.json'):
+    #     with open('links-created.json', 'r') as file:
+    #         links = json.load(file)
+    #         return jsonify(links)
+    # else:
+    #     return jsonify([])
+    if os.path.exists('super-adm-linK-settings.json'):
+        with open('super-adm-linK-settings.json', 'r') as file:
             links = json.load(file)
             return jsonify(links)
     else:
@@ -84,6 +110,30 @@ def save_link():
         json.dump(links, file)
     
     return jsonify({"status": "success"})
+
+
+json_file_path = 'super-adm-link-settings.json'
+
+@app.route('/save_super_admin_settings', methods=['POST'])
+def update_or_create_json():
+    # Get the posted JSON data
+    data = request.json
+
+    # Load the existing JSON file if it exists
+    if os.path.exists(json_file_path):
+        with open(json_file_path, 'r') as file:
+            existing_data = json.load(file)
+    else:
+        existing_data = {}  # Create an empty dictionary if the file doesn't exist
+
+    # Merge the new data with the existing data
+    existing_data.update(data)
+
+    # Save the updated data back to the JSON file
+    with open(json_file_path, 'w') as file:
+        json.dump(existing_data, file, indent=2)
+
+    return jsonify({'message': 'Data updated or created successfully'})
 
 
 @app.route('/process_answer/<id>', methods=['POST'])

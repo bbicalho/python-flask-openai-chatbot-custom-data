@@ -14,3 +14,5 @@ nohup.out
 ratings.json
 links-created.json
 log_file-*
+sendgridtest.py
+super-adm-link-settings.json
