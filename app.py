@@ -88,8 +88,8 @@ def get_links():
     #         return jsonify(links)
     # else:
     #     return jsonify([])
-    if os.path.exists('super-adm-linK-settings.json'):
-        with open('super-adm-linK-settings.json', 'r') as file:
+    if os.path.exists('super-adm-link-settings.json'):
+        with open('super-adm-link-settings.json', 'r') as file:
             links = json.load(file)
             return jsonify(links)
     else:
