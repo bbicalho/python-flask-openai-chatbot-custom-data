@@ -46,13 +46,39 @@
     <script>
         function createLink() {
             const randomString = Math.random().toString(36).substring(2, 8);
-            contatenated = '<a href="menu/'+randomString+'"> link chatbot: '+randomString+'</a>';
-            document.getElementById('linkContainer').innerHTML += contatenated + '<br>';
-            fetch('/save_link', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ link: randomString })
-            });
+            
+            // contatenated = '<a href="menu/'+randomString+'"> link chatbot: '+randomString+'</a>';
+            // document.getElementById('linkContainer').innerHTML += contatenated + '<br>';
+
+            // Get a reference to the table
+            var table = document.getElementById("linktable").getElementsByTagName('tbody')[0];
+            var newRow = table.insertRow(table.rows.length);
+            newRow.id = randomString;
+            // table += '<tr id="'+key+'">';
+  
+            // Add cells (columns) to the row
+            var cell1 = newRow.insertCell(0);
+            var cell2 = newRow.insertCell(1);
+            var cell3 = newRow.insertCell(2);
+            var cell4 = newRow.insertCell(3);
+            var cell5 = newRow.insertCell(4);
+
+            var key = randomString;
+            // Create text input elements for each cell
+            cell1.innerHTML = '<a id="'+key+'" name="link'+key+'" href="menu/'+key+'"> link chatbot: '+key+'</a>';
+            cell2.innerHTML = '<input type="checkbox" name="ativaprompt'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa prompt</input>';
+            cell3.innerHTML = '<input type="checkbox" name="ativaarquivo'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa arquivo</input>';
+            cell4.innerHTML = '<input type="checkbox" name="ativatreinar'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa treinar</input>';
+            cell5.innerHTML = '<input type="checkbox" name="ativadelete'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa delete</input>';
+
+            // alert(key);
+            handleCheckboxChange(key);
+            
+            // fetch('/save_link', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ link: randomString })
+            // });
         }
 
                     
@@ -61,6 +87,8 @@
             // const checked = checkbox.checked;
             // alert(rowId);
             // alert(row);
+            // alert(row.cells);
+            // return;
             if (row) {
 
                 var dataToSave = {}; // Object to store the data
@@ -153,7 +181,7 @@
             .then(data => {
                 let i = 0;
                 // let contatenated = "";
-                let table = '<table class="zebra" style="max-width:60%;">';
+                let table = '<table id="linktable" class="zebra" style="max-width:60%;">';
                 // console.log(data)
                 // while (i < data.length) {
                 for (var key in data) {

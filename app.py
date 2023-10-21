@@ -49,8 +49,15 @@ def home():
 
 @app.route('/menu/<id>', methods=['GET'])
 def menu(id):
-    print(id)
+    # print(id)
 
+    
+    can_upload,can_train,can_prompt,can_delete = get_link_config(id)
+
+    return render_template('index.html',user_id=id, can_upload=can_upload, can_train=can_train, can_prompt=can_prompt, can_delete=can_delete)
+
+
+def get_link_config(id):
     # get menu permissions and list only allowed menus
     if os.path.exists('super-adm-link-settings.json'):
         with open('super-adm-link-settings.json', 'r') as file:
@@ -70,13 +77,16 @@ def menu(id):
         can_prompt = True
         can_delete = True
 
-    return render_template('index.html',user_id=id, can_upload=can_upload, can_train=can_train, can_prompt=can_prompt, can_delete=can_delete)
-
+    return can_upload,can_train,can_prompt,can_delete
 
 @app.route('/chatbot/<id>', methods=['GET'])
 def chatbot(id):
+
     questions_array.clear()
-    return render_template('chatbot2.html', user_id=id)
+
+    can_upload,can_train,can_prompt,can_delete = get_link_config(id)
+
+    return render_template('chatbot2.html', user_id=id, can_delete=can_delete)
 
 
 
@@ -288,38 +298,39 @@ def submit_delete():
         
         # delete files from received files
         folder_path = "receivedfiles/"+myid
-    
-        file_list = os.listdir(folder_path)
-        for filename in file_list:
-            # Construct the full file path
-            file_path = os.path.join(folder_path, filename)
-            # print(file_path)
-            
-            # Delete the txt file
-            os.remove(file_path)
+        if(os.path.exists(folder_path)):
+            file_list = os.listdir(folder_path)
+            for filename in file_list:
+                # Construct the full file path
+                file_path = os.path.join(folder_path, filename)
+                # print(file_path)
+                
+                # Delete the txt file
+                os.remove(file_path)
     
         # delete files from pdf-folder
         folder_path = "pdf-folder/"+myid
-        file_list = os.listdir(folder_path)
-        for filename in file_list:
-            # Construct the full file path
-            file_path = os.path.join(folder_path, filename)
-            # print(file_path)
-            
-            # Delete the txt file
-            os.remove(file_path)
-    
+        if(os.path.exists(folder_path)):
+            file_list = os.listdir(folder_path)
+            for filename in file_list:
+                # Construct the full file path
+                file_path = os.path.join(folder_path, filename)
+                # print(file_path)
+                
+                # Delete the txt file
+                os.remove(file_path)
+        
         # delete files from processed
         folder_path = "processed/"+myid
-        file_list = os.listdir(folder_path)
-        for filename in file_list:
-            # Construct the full file path
-            file_path = os.path.join(folder_path, filename)
-            # print(file_path)
-            
-            # Delete the txt file
-            os.remove(file_path)
-    
+        if(os.path.exists(folder_path)):
+            file_list = os.listdir(folder_path)
+            for filename in file_list:
+                # Construct the full file path
+                file_path = os.path.join(folder_path, filename)
+                # print(file_path)
+                
+                # Delete the txt file
+                os.remove(file_path)
         
         return jsonify({'message': 'Chat deleted ok'})
     except Exception as e:
