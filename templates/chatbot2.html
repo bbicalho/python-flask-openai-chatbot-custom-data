@@ -19,39 +19,57 @@
             width: 400px;
             margin: 20px auto;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 10px;
             overflow-y: scroll;
             max-height: 500px;
             padding: 10px;
             resize: both;
+            background-color: #f5f5f5;
         }
 
+        
         .message {
             margin-bottom: 10px;
             padding: 5px;
             border-radius: 5px;
+            max-width: 90%; /* Adjust as needed */
         }
 
         .user {
-            background-color: #cce5ff;
-            /* text-align: left; */
+            background-color: #dcf8c6; /* Light green for user messages */
+            align-self: flex-end;
+            text-align: right;
         }
 
         .answer-machine {
-            background-color: #e5ffcc;
-            /* text-align: right; */
+            background-color: #b4daf0; /* White for friend messages */
+            align-self: flex-start;
+            text-align: left;
         }
 
         .timestamp {
             font-size: 12px;
             color: #888;
             margin-bottom: 5px;
+            text-align: right;
         }
     </style>
 </head>
 <body>
     <a href="{{ url_for('menu', id=user_id) }}">Back to Homepage</a>
-    <div class="chat-container" id="chatContainer"><div class="resize-handle"></div></div>
+    <div class="chat-container" id="chatContainer"><div class="resize-handle"></div>
+    
+    <div class="message answer-machine"><div class="timestamp">{{current_datetime}}</div><div>Bom dia, estou pronto para ajudar você em seus objetivos. Por favor faça uma pergunta.</div></div>
+    
+    {% for question in questions_array: %} 
+        {% if loop.index0 % 2 == 0 %}
+            <div class="message user"><div class="timestamp">{{current_datetime}}</div><div>{{question}}</div></div>
+        {% else: %}
+            <div class="message answer-machine"><div class="timestamp">{{current_datetime}}</div><div>{{question}}</div></div>
+        {% endif %}
+    {% endfor %}
+
+</div>
 
     <div class="input-container">
         <textarea type="text" id="userInput" cols="50" rows="5" placeholder="Type your question..." onkeypress="handleKeyPress(event)"></textarea>

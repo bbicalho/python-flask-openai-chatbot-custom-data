@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, jsonify, make_response, redirect, url_for
+# import traceback
 import os
+import sys
 import json
 from datetime import datetime
 import shutil
@@ -40,7 +42,7 @@ brasilia_tz = pytz.timezone('America/Sao_Paulo')
 current_datetime = datetime.now(brasilia_tz)
 file_path = 'log_file-'+current_datetime.strftime('%Y-%m-%d-%H-%M-%S%Z')+'.txt'
 
-questions_array = []
+# questions_array = []
 
 @app.route('/superadm')
 def home():
@@ -82,11 +84,36 @@ def get_link_config(id):
 @app.route('/chatbot/<id>', methods=['GET'])
 def chatbot(id):
 
-    questions_array.clear()
+    questions_file = os.path.join(app.root_path, 'messages/'+id+'/chat-messages.json')
+    question_values = {}
+    if(os.path.exists(questions_file)):
+        with open(questions_file, 'r', encoding="utf-8") as file:
+            question_values = json.load(file)
+
+    # questions_array.clear()
+    if id not in question_values:
+        questions_array = []
+    else:    
+        # print(question_values[id]['messages'])
+        questions_array = question_values[id]['messages']
+
+    # prompt_file = os.path.join(app.root_path, 'prompts/'+id+'/prompts-values.json')
+    # prompts_values = {}
+    # if(os.path.exists(prompt_file)):
+    #     with open(prompt_file, 'r', encoding="utf-8") as file:
+    #         prompts_values = json.load(file)
+
+    # print(prompts_values)
+
+    # save_data_to_json({id:{'prompt-role':prompts_values['prompt-role-purpose'],'prompt-dont-know-text':prompts_values['prompt-dont-know-text']}},"messages/"+id+"/chat-messages.json")
 
     can_upload,can_train,can_prompt,can_delete = get_link_config(id)
+    saopaulo_tz = pytz.timezone('America/Sao_Paulo')
+    # Get the current datetime in the Sao Paulo timezone
+    current_datetime_saopaulo = datetime.now(saopaulo_tz)
+    current_datetime_saopaulo_str = current_datetime_saopaulo.strftime('%Y-%m-%d %H:%M:%S')
 
-    return render_template('chatbot2.html', user_id=id, can_delete=can_delete)
+    return render_template('chatbot2.html', user_id=id, can_delete=can_delete, questions_array=questions_array, current_datetime=current_datetime_saopaulo_str)
 
 
 
@@ -129,34 +156,41 @@ def update_or_create_json():
     # Get the posted JSON data
     data = request.json
 
+    return jsonify({'message': 'Data updated or created successfully'})
+
+def save_data_to_json(data, local_json_file_path):
     # Load the existing JSON file if it exists
-    if os.path.exists(json_file_path):
-        with open(json_file_path, 'r') as file:
+    if os.path.exists(local_json_file_path):
+        with open(local_json_file_path, 'r') as file:
             existing_data = json.load(file)
     else:
+        directory = os.path.dirname(local_json_file_path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
         existing_data = {}  # Create an empty dictionary if the file doesn't exist
 
     # Merge the new data with the existing data
     existing_data.update(data)
 
     # Save the updated data back to the JSON file
-    with open(json_file_path, 'w') as file:
+    with open(local_json_file_path, 'w') as file:
         json.dump(existing_data, file, indent=2)
-
-    return jsonify({'message': 'Data updated or created successfully'})
-
+        
 
 @app.route('/process_answer/<id>', methods=['POST'])
 def process_answer(id):
     user_question = request.json['question']
+
     # Call your process_answer function here and get the bot's answer
     # Replace the example response with the actual bot's answer
 
     # df=pd.read_csv('processed/embeddings.csv', index_col=0)
+    df = None
     processed_folder = 'processed/'+id
-    df=pd.read_csv(processed_folder+'/embeddings.csv', index_col=0)
-    df['embeddings'] = df['embeddings'].apply(literal_eval).apply(np.array)
-
+    if(os.path.exists(processed_folder)):
+        df=pd.read_csv(processed_folder+'/embeddings.csv', index_col=0)
+        df['embeddings'] = df['embeddings'].apply(literal_eval).apply(np.array)
+    
     bot_answer = answer_question(df, question=user_question,id=id)
     # bot_answer = "This is an example response from the bot."
 
@@ -296,43 +330,22 @@ def submit_delete():
         data = request.get_json()
         myid = data['myid']
         
-        # delete files from received files
-        folder_path = "receivedfiles/"+myid
-        if(os.path.exists(folder_path)):
-            file_list = os.listdir(folder_path)
-            for filename in file_list:
-                # Construct the full file path
-                file_path = os.path.join(folder_path, filename)
-                # print(file_path)
-                
-                # Delete the txt file
-                os.remove(file_path)
-    
-        # delete files from pdf-folder
-        folder_path = "pdf-folder/"+myid
-        if(os.path.exists(folder_path)):
-            file_list = os.listdir(folder_path)
-            for filename in file_list:
-                # Construct the full file path
-                file_path = os.path.join(folder_path, filename)
-                # print(file_path)
-                
-                # Delete the txt file
-                os.remove(file_path)
+        array_folders = ["receivedfiles/"+myid, "pdf-folder/"+myid, "training/"+myid, "processed"+myid, "messages/"+myid]
+
+        for folder in array_folders:
+            # delete files from received files
+            folder_path = folder
+            if(os.path.exists(folder_path)):
+                file_list = os.listdir(folder_path)
+                for filename in file_list:
+                    # Construct the full file path
+                    file_path = os.path.join(folder_path, filename)
+                    # print(file_path)
+                    
+                    # Delete the txt file
+                    os.remove(file_path)
         
-        # delete files from processed
-        folder_path = "processed/"+myid
-        if(os.path.exists(folder_path)):
-            file_list = os.listdir(folder_path)
-            for filename in file_list:
-                # Construct the full file path
-                file_path = os.path.join(folder_path, filename)
-                # print(file_path)
-                
-                # Delete the txt file
-                os.remove(file_path)
-        
-        return jsonify({'message': 'Chat deleted ok'})
+        return jsonify({'message': 'Chat e arquivos aprendidos deletados ok!'})
     except Exception as e:
         return jsonify({'error': str(e)})
 
@@ -721,12 +734,16 @@ def answer_question(
     """
     Answer a question based on the most similar context from the dataframe texts
     """
-    context = create_context(
-        question,
-        df,
-        max_len=max_len,
-        size=size,
-    )
+    if df is not None:
+        context = create_context(
+            question,
+            df,
+            max_len=max_len,
+            size=size,
+        )
+    else:
+        context = ""
+
     # If debug, print the raw model response
     if debug:
         print("Context:\n" + context)
@@ -746,6 +763,19 @@ def answer_question(
         prompt_role_purpose = data.get("prompt-role-purpose", "")
         # print(prompt_dont_know_text)
         # print(prompt_role_purpose)
+
+        questions_file = os.path.join(app.root_path, 'messages/'+id+'/chat-messages.json')
+        question_values = []
+        if(os.path.exists(questions_file)):
+            with open(questions_file, 'r', encoding="utf-8") as file:
+                question_values = json.load(file)
+
+        # questions_array.clear()
+        # print(question_values[id]['messages'])
+        if id in question_values:
+            questions_array = question_values[id]['messages']
+        else:
+            questions_array = []
 
         questions_array.append(question)
 
@@ -777,10 +807,22 @@ def answer_question(
         log_to_file('completion: '+str(response['usage']))
         # print(response['usage'])
         # print(response['choices'])
-        
-        questions_array.append(response['choices'][0]['message']['content'])
 
-        return response['choices'][0]['message']['content']
+        bot_response = response['choices'][0]['message']['content']
+        
+        questions_array.append(bot_response)
+        # print(id)
+        # print(prompt_role_purpose)
+        # print(prompt_dont_know_text)
+        # print(questions_array)
+
+        save_data_to_json({id:{'prompt-role':prompt_role_purpose,
+                               'prompt-dont-know-text':prompt_dont_know_text,
+                               'messages':questions_array
+                               }},"messages/"+id+"/chat-messages.json")
+
+
+        return bot_response
     
         # # Create a completions using the questin and context
         # response = openai.Completion.create(
@@ -795,8 +837,14 @@ def answer_question(
         # )
         # return response["choices"][0]["text"].strip()
     except Exception as e:
-        print(e)
-        return ""
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+    
+        # Get the line number where the exception occurred
+        line_no = exc_traceback.tb_lineno
+    
+        print(f"An exception of type {type(e).__name__} occurred at line {line_no}.")
+        # print(e)
+        return str(e)
 
 def log_to_file(message):
     
