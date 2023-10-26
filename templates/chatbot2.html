@@ -63,9 +63,9 @@
     
     {% for question in questions_array: %} 
         {% if loop.index0 % 2 == 0 %}
-            <div class="message user"><div class="timestamp">{{current_datetime}}</div><div>{{question}}</div></div>
+            <div class="message user"><div class="timestamp">{{current_datetime}}</div><div>{{ question|replace("\n", "<br>")|urlize|safe }}</div></div>
         {% else: %}
-            <div class="message answer-machine"><div class="timestamp">{{current_datetime}}</div><div>{{question}}</div></div>
+            <div class="message answer-machine"><div class="timestamp">{{current_datetime}}</div><div>{{ question|replace("\n", "<br>")|urlize|safe }}</div></div>
         {% endif %}
     {% endfor %}
 

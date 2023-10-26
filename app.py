@@ -81,6 +81,8 @@ def get_link_config(id):
 
     return can_upload,can_train,can_prompt,can_delete
 
+
+
 @app.route('/chatbot/<id>', methods=['GET'])
 def chatbot(id):
 
@@ -113,9 +115,14 @@ def chatbot(id):
     current_datetime_saopaulo = datetime.now(saopaulo_tz)
     current_datetime_saopaulo_str = current_datetime_saopaulo.strftime('%Y-%m-%d %H:%M:%S')
 
-    return render_template('chatbot2.html', user_id=id, can_delete=can_delete, questions_array=questions_array, current_datetime=current_datetime_saopaulo_str)
+    return render_template('chatbot2.html', user_id=id, can_delete=can_delete, questions_array=questions_array , current_datetime=current_datetime_saopaulo_str)
 
 
+def urlize(text):
+    url_pattern = re.compile(r'(https?://[^\s]+)')
+    return url_pattern.sub(r'<a href="\1" target="_blank">\1</a>', text)
+
+app.jinja_env.filters['urlize'] = urlize
 
 @app.route('/get_links', methods=['GET'])
 def get_links():
