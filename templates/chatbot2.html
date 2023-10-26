@@ -183,6 +183,11 @@
 
         let answerCount = 0;
 
+        function convertUrlsToAnchors(inputText) {
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return inputText.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+        }
+
         function addMessage(message, type) {
             const chatContainer = document.getElementById("chatContainer");
             const messageDiv = document.createElement("div");
@@ -194,7 +199,8 @@
 
             const content = document.createElement("div");
             // console.log(message)
-            content.textContent = message;
+            const convertedText = convertUrlsToAnchors(message).replace(/\n/g, '<br>');
+            content.innerHTML = convertedText;
 
             messageDiv.appendChild(timestamp);
             messageDiv.appendChild(content);
