@@ -186,9 +186,9 @@ def process_answer(id):
 
     # df=pd.read_csv('processed/embeddings.csv', index_col=0)
     df = None
-    processed_folder = 'processed/'+id
+    processed_folder = 'processed/'+id+'/embeddings.csv'
     if(os.path.exists(processed_folder)):
-        df=pd.read_csv(processed_folder+'/embeddings.csv', index_col=0)
+        df=pd.read_csv(processed_folder, index_col=0)
         df['embeddings'] = df['embeddings'].apply(literal_eval).apply(np.array)
     
     bot_answer = answer_question(df, question=user_question,id=id)
