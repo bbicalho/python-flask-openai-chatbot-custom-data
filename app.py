@@ -43,6 +43,7 @@ current_datetime = datetime.now(brasilia_tz)
 file_path = 'log_file-'+current_datetime.strftime('%Y-%m-%d-%H-%M-%S%Z')+'.txt'
 
 # questions_array = []
+json_file_path = 'super-adm-link-settings.json'
 
 @app.route('/superadm')
 def home():
@@ -61,8 +62,8 @@ def menu(id):
 
 def get_link_config(id):
     # get menu permissions and list only allowed menus
-    if os.path.exists('super-adm-link-settings.json'):
-        with open('super-adm-link-settings.json', 'r') as file:
+    if os.path.exists(json_file_path):
+        with open(json_file_path, 'r') as file:
             links = json.load(file)
             # return jsonify(links)
     else:
@@ -132,8 +133,8 @@ def get_links():
     #         return jsonify(links)
     # else:
     #     return jsonify([])
-    if os.path.exists('super-adm-link-settings.json'):
-        with open('super-adm-link-settings.json', 'r') as file:
+    if os.path.exists(json_file_path):
+        with open(json_file_path, 'r') as file:
             links = json.load(file)
             return jsonify(links)
     else:
@@ -156,12 +157,12 @@ def save_link():
     return jsonify({"status": "success"})
 
 
-json_file_path = 'super-adm-link-settings.json'
-
 @app.route('/save_super_admin_settings', methods=['POST'])
 def update_or_create_json():
     # Get the posted JSON data
     data = request.json
+
+    save_data_to_json(data, json_file_path)
 
     return jsonify({'message': 'Data updated or created successfully'})
 

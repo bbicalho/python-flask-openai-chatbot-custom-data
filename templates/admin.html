@@ -62,14 +62,16 @@
             var cell3 = newRow.insertCell(2);
             var cell4 = newRow.insertCell(3);
             var cell5 = newRow.insertCell(4);
+            var cell6 = newRow.insertCell(5);
 
             var key = randomString;
             // Create text input elements for each cell
             cell1.innerHTML = '<a id="'+key+'" name="link'+key+'" href="menu/'+key+'"> link chatbot: '+key+'</a>';
-            cell2.innerHTML = '<input type="checkbox" name="ativaprompt'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa prompt</input>';
-            cell3.innerHTML = '<input type="checkbox" name="ativaarquivo'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa arquivo</input>';
-            cell4.innerHTML = '<input type="checkbox" name="ativatreinar'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa treinar</input>';
-            cell5.innerHTML = '<input type="checkbox" name="ativadelete'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa delete</input>';
+            cell2.innerHTML = 'nome: <input type="text" id="name'+key+'" name="nome'+key+'" value="temp"></input><input type="button" value="salvar" onclick="alert(\''+'name'+key+'\')"/>';
+            cell3.innerHTML = '<input type="checkbox" name="ativaprompt'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa prompt</input>';
+            cell4.innerHTML = '<input type="checkbox" name="ativaarquivo'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa arquivo</input>';
+            cell5.innerHTML = '<input type="checkbox" name="ativatreinar'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa treinar</input>';
+            cell6.innerHTML = '<input type="checkbox" name="ativadelete'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa delete</input>';
 
             // alert(key);
             handleCheckboxChange(key);
@@ -99,6 +101,7 @@
                 // Iterate through all the cells in the row
                 for (var i = 0; i < row.cells.length; i++) {
                     var cellType = row.cells[i].nodeName;
+
                     // console.log('Cell ' + i + ' type: ' + cellType);
                     var checkboxInput = row.cells[i].querySelector('input[type="checkbox"]');
 
@@ -121,11 +124,18 @@
                         checkboxInputName = alink.name;
                     }
 
+                    var InputBox = row.cells[i].querySelector('input[type="text"]');
+                    if (InputBox) {
+                            checkboxInputName = InputBox.name;
+                            checkboxischecked = InputBox.value;
+                    }                       
+                    
+
                     // Access the cell's data value and do something with it
                     var cellData = row.cells[i].textContent;
                     var cellID = checkboxInputid;
                     var cellvalue = row.cells[i].checked;
-                    console.log('Cell ' + i + ', id: '+ cellID +', checkboxvalue: '+ checkboxischecked+', data: ' + cellData);
+                    console.log('Cell ' + i +', id: '+ cellID +', checkboxvalue: '+ checkboxischecked+', data: ' + cellData);
                     // dataToSave[cellID] = {checkboxInputName,cellvalue];
                     
                     if(i == 0)
@@ -139,6 +149,7 @@
                 // dataToSave[cellID] = [checkboxischecked,checkboxInputName];
                 // console.log(dataToSave);
                 
+                // alert(JSON.stringify(dataToSave));
                 var postarray = {};
                 postarray[rowID] = dataToSave;
 
@@ -186,10 +197,19 @@
                 // while (i < data.length) {
                 for (var key in data) {
                     // console.log(key);
-                    console.log(data[key]['ativaprompt'+key]);
-                    // console.log(data['ativaprompt'+key]);
+                    // console.log(data[key]['ativaprompt'+key]);
+                    // console.log(JSON.stringify(data));
+                    let nomelinha = "";
+                    if (typeof data[key]['nome'+key] === 'undefined') {
+                        nomelinha = "";
+                    }
+                    else{
+                        nomelinha = data[key]['nome'+key];
+                    }
+
                     table += '<tr id="'+key+'">';
                     table +=  '<td><a id="'+key+'" name="link'+key+'" href="menu/'+key+'"> link chatbot: '+key+'</a></td>';
+                    table +=  '<td>nome chatbot:<input type="text" id="name'+key+'" name="nome'+key+'" value="'+nomelinha+'"><input type="button" value="salvar" onclick="handleCheckboxChange('+"'"+key+"'"+')"/></td>';
                     var ativaprompt = (data[key]['ativaprompt'+key]==true)?'checked':'';
                     table +=  '<td><input type="checkbox" name="ativaprompt'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" '+ativaprompt+'> ativa prompt</input></td>';
                     var ativaarquivo = (data[key]['ativaarquivo'+key]==true)?'checked':'';
