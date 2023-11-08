@@ -59,7 +59,26 @@
     <a href="{{ url_for('menu', id=user_id) }}">Back to Homepage</a>
     <div class="chat-container" id="chatContainer"><div class="resize-handle"></div>
     
-    <div class="message answer-machine"><div class="timestamp">{{current_datetime}}</div><div>Bom dia, estou pronto para ajudar você em seus objetivos. Por favor faça uma pergunta.</div></div>
+    <div class="message answer-machine"><div class="timestamp">{{current_datetime}}</div><div>
+        🌟 Seja bem-vindo ao Ai Ready, o seu Chatbot Personalizável! 🌟 <br><br>
+
+Prepare-se para explorar e moldar a sua experiência de interação: <br><br>
+
+📂 Submeter Arquivos para Aprender: Faça o Ai Ready se tornar um especialista no seu campo com uploads de documentos. (Disponibilidade sujeita a permissões.) <br><br>
+
+🛠 Treinar a IA com Arquivos: Personalize o aprendizado do Ai Ready para que atenda perfeitamente às suas exigências. (Acesso pode ser limitado baseado em seu plano.) <br><br>
+
+✏️ Editar Prompts do Chatbot: Guie o Ai Ready para conversar do jeito que você prefere. (Opções podem variar conforme o nível de acesso.) <br><br>
+
+💬 Ir para o Chatbot Ai Ready: Interaja com o nosso chatbot inteligente e veja a tecnologia em ação. <br><br>
+
+🗑 Apagar: Privacidade é nossa prioridade. Você tem a liberdade de remover os documentos treinados sempre que desejar. <br><br>
+
+🔍 Atenção: A disponibilidade de funcionalidades do Ai Ready pode variar conforme o seu nível de acesso ou plano de serviço. Para mais detalhes, consulte as condições de uso ou fale com nosso suporte. <br><br>
+
+Navegue pelo menu principal e comece a sua jornada com o Ai Ready hoje mesmo! <br><br>
+
+    </div></div>
     
     {% for question in questions_array: %} 
         {% if loop.index0 % 2 == 0 %}
