@@ -67,7 +67,7 @@
             var key = randomString;
             // Create text input elements for each cell
             cell1.innerHTML = '<a id="'+key+'" name="link'+key+'" href="menu/'+key+'"> link chatbot: '+key+'</a>';
-            cell2.innerHTML = 'nome: <input type="text" id="name'+key+'" name="nome'+key+'" value="temp"></input><input type="button" value="salvar" onclick="alert(\''+'name'+key+'\')"/>';
+            cell2.innerHTML = 'nome chatbot: <input type="text" id="name'+key+'" name="nome'+key+'" value="temp"></input><input type="button" value="salvar" onclick="handleCheckboxChange('+"'"+key+"'"+')"/>';
             cell3.innerHTML = '<input type="checkbox" name="ativaprompt'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa prompt</input>';
             cell4.innerHTML = '<input type="checkbox" name="ativaarquivo'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa arquivo</input>';
             cell5.innerHTML = '<input type="checkbox" name="ativatreinar'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa treinar</input>';
