@@ -84,6 +84,31 @@ def get_link_config(id):
 
 
 
+def get_config_by_id(id):
+    # get menu permissions and list only allowed menus
+    if os.path.exists(json_file_path):
+        with open(json_file_path, 'r') as file:
+            links = json.load(file)
+            # return jsonify(links)
+    else:
+        links = {}
+
+    if id in links:
+        can_upload = links[id]['ativaarquivo'+id]
+        can_train = links[id]['ativatreinar'+id]
+        can_prompt = links[id]['ativaprompt'+id]
+        can_delete = links[id]['ativadelete'+id] 
+        model = links[id]['model']
+    else:
+        can_upload = True
+        can_train = True
+        can_prompt = True
+        can_delete = True
+        model = 'gpt-3.5-turbo-16k'
+
+    return {"can_upload":can_upload,"can_train":can_train,"can_prompt":can_prompt,"can_delete":can_delete,"model":model}
+
+
 @app.route('/chatbot/<id>', methods=['GET'])
 def chatbot(id):
 
@@ -610,7 +635,7 @@ def process_pdf_txt(id):
 
 def do_embeddings(id):
 
-    max_tokens = 1500
+    max_tokens = 8000
 
     # Load the cl100k_base tokenizer which is designed to work with the ada-002 model
     tokenizer = tiktoken.get_encoding("cl100k_base")
@@ -685,7 +710,7 @@ def do_embeddings(id):
     
 
 def create_context(
-    question, df, max_len=3800, size="ada"
+    question, df, max_len=8000, size="ada"
 ):
     """
     Create a context for a question by finding the most similar context from the dataframe
@@ -732,7 +757,7 @@ def answer_question(
     # model="text-davinci-003",
     model="gpt-3.5-turbo-16k",
     question="Am I allowed to publish model outputs to Twitter, without a human review?",
-    max_len=5800,
+    max_len=8000,
     size="ada",
     debug=False,
     max_tokens=15000,
@@ -801,9 +826,11 @@ def answer_question(
                 messages_parameter.append({"role": "assistant", "content": question})
             i = i+1
         
+        thismodel = get_config_by_id(id)['model']
         response = openai.ChatCompletion.create(
             # model="gpt-3.5-turbo",
-            model="gpt-3.5-turbo-16k",
+            # model="gpt-3.5-turbo-16k",
+            model=thismodel,
             temperature=0.0,
             messages=messages_parameter
         )
@@ -856,6 +883,7 @@ def answer_question(
 
 def log_to_file(message):
     
+    print(message)
     message = message.replace("\r\n", "")
     brasilia_tz = pytz.timezone('America/Sao_Paulo')
     current_datetime = datetime.now(brasilia_tz)

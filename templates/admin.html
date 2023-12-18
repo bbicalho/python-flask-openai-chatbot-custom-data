@@ -63,6 +63,7 @@
             var cell4 = newRow.insertCell(3);
             var cell5 = newRow.insertCell(4);
             var cell6 = newRow.insertCell(5);
+            var cell7 = newRow.insertCell(6);
 
             var key = randomString;
             // Create text input elements for each cell
@@ -72,6 +73,30 @@
             cell4.innerHTML = '<input type="checkbox" name="ativaarquivo'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa arquivo</input>';
             cell5.innerHTML = '<input type="checkbox" name="ativatreinar'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa treinar</input>';
             cell6.innerHTML = '<input type="checkbox" name="ativadelete'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" checked> ativa delete</input>';
+            
+            const optionsArray = [
+                    'gpt-4-1106-preview',
+                    'gpt-4-0613',
+                    'gpt-4-32k-0613',
+                    'gpt-3.5-turbo-1106',
+                    'gpt-3.5-turbo-16k'
+                    ];
+
+            // const searchString = data[key]['model'+key];
+            const searchString = 'gpt-3.5-turbo-16k';
+
+            let optionsHtml = '';
+
+            optionsArray.forEach(option => {
+                // Check if the current option matches the search string
+                const selected = option === searchString ? ' selected' : '';
+
+                // Append the option to the optionsHtml string
+                optionsHtml += `<option value="${option}"${selected}>${option}</option>`;
+            });
+            
+            cell7.innerHTML = '<select>'+optionsHtml+'</select>';
+
 
             // alert(key);
             handleCheckboxChange(key);
@@ -126,10 +151,17 @@
 
                     var InputBox = row.cells[i].querySelector('input[type="text"]');
                     if (InputBox) {
-                            checkboxInputName = InputBox.name;
-                            checkboxischecked = InputBox.value;
+                        checkboxInputName = InputBox.name;
+                        checkboxischecked = InputBox.value;
                     }                       
                     
+                    var selectBox = row.cells[i].querySelector('select');
+                    if (selectBox) {
+                        checkboxInputName = selectBox.name;
+                        checkboxischecked = selectBox.value;
+                        // Do something with selectedOptionValue
+                    }
+
 
                     // Access the cell's data value and do something with it
                     var cellData = row.cells[i].textContent;
@@ -218,6 +250,31 @@
                     table +=  '<td><input type="checkbox" name="ativatreinar'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" '+ativatreinar+'> ativa treinar</input></td>';
                     var ativadelete = (data[key]['ativadelete'+key]==true)?'checked':'';
                     table +=  '<td><input type="checkbox" name="ativadelete'+key+'" onchange="handleCheckboxChange('+"'"+key+"'"+')" '+ativadelete+'> ativa delete</input></td>';
+                    
+                    const optionsArray = [
+                    'gpt-4-1106-preview',
+                    'gpt-4-0613',
+                    'gpt-4-32k-0613',
+                    'gpt-3.5-turbo-1106',
+                    'gpt-3.5-turbo-16k'
+                    ];
+
+                    // const searchString = data[key]['model'+key];
+                    const searchString = data[key]?.['model'] ?? 'gpt-3.5-turbo-16k';
+
+                    let optionsHtml = '';
+
+                    optionsArray.forEach(option => {
+                        // Check if the current option matches the search string
+                        const selected = option === searchString ? ' selected' : '';
+
+                        // Append the option to the optionsHtml string
+                        optionsHtml += `<option value="${option}"${selected}>${option}</option>`;
+                    });
+
+                    // console.log(optionsHtml);
+                    table += '<td><select name="model" onchange="handleCheckboxChange('+"'"+key+"'"+')">'+optionsHtml+'></select></td>';
+
                     // contatenated += '<br>';
                     table += '</tr>';
             
